@@ -30,3 +30,7 @@ pip install win32com
 # linux dependencies
 
 no dependencies
+
+# examples
+
+https://github.com/coolxv/audep-example.git
