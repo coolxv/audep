@@ -1,14 +1,20 @@
 # audep
 automated deployment tool
 
-# use
-pip install --user poetry
+# used as a python package.
+pip install poetry
 
 poetry install
 
 poetry build
 
 pip install audep-*.whl 
+
+./audep -f redis.toml -l 10
+# used as a stand-alone procedure
+pip install  poetry
+
+poetry install
 
 poetry run pyinstaller -F audep-cli.spec 
 
