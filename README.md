@@ -38,3 +38,41 @@ no dependencies
 # examples
 
 https://github.com/coolxv/audep-example.git
+
+```
+#const
+$py(ip1='192.168.10.10')
+#host
+[hosts.centos1]
+host = 'root@$(ip1):22'
+pwd = '123456'
+
+#app
+[apps.redis]
+file = '''
+       d"$(lcwd)/../redis/">>d"/opt/redis/"
+       (
+            "redis-"=>775,
+            "xxx-"=>775
+       )
+       '''
+config = '''
+         tl"$(lcwd)/../redis/conf/redis.conf"
+         (
+            "^bind"=>"bind 127.0.0.1",
+            "^port"=>"port %{port}",
+            "^daemonize"=>"daemonize yes"
+         )
+         '''
+action = '''
+         r"ls"->0
+         redis::start("/opt/redis/")
+         '''
+
+#task
+[[tasks]]
+name = 'redis'
+task = '''
+       redis@centos1(port=6379)
+       '''
+```
