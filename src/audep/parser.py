@@ -179,8 +179,7 @@ class FileModel:
         self._operation = None
         self._lflag = None
         self._rflag = None
-        self._permit = None
-        self._re = None
+        self._mode = []
         self._processor = {
             'local': self.__local,
             'remote': self.__remote,
@@ -215,17 +214,13 @@ class FileModel:
         return self._rflag
 
     @property
-    def permit(self):
-        return self._permit
-
-    @property
-    def re(self):
-        return self._re
+    def mode(self):
+        return self._mode
 
     def __str__(self):
         return f"the local is {self._local}, lflag is {self._lflag}," \
                f" remote is {self._remote}, rflag is {self._rflag}," \
-               f" permit is {self._permit}, re is {self._re}"
+               f" mode is {self._mode}"
 
     __repr__ = __str__
 
@@ -255,9 +250,9 @@ class FileModel:
 
     def __mode(self, children):
         logging.debug(children[0])
-        self._permit = children[0].children[0]*100 + children[0].children[1]*10 + children[0].children[2]
-        if len(children) == 2:
-            self._re = children[1].children[0]
+        for t in children:
+            permit = t.children[1].children[0] * 100 + t.children[1].children[1] * 10 + t.children[1].children[2]
+            self._mode.append({"filter": t.children[0].children[0], "permit": permit})
 
 
 class TaskModel:
@@ -390,17 +385,18 @@ _config_grammar = """
 """
 
 _file_grammar = """
-    start: file*                                          -> start
-    file: lflag local operation rflag remote [mode]       -> file
+    start: file*                                                 -> start
+    file: lflag local operation rflag remote "(" [mode] ")"      -> file
     local: string
     remote: string
-    !operation: ("=>" | "<=")
+    !operation: (">>" | "<<")
     lflag: flag
     rflag: flag
     !flag: ("f" | "d")
-    mode: "+" permit [filter]
-    permit:  number~3
+    mode: [pattern] ("," pattern)* 
+    pattern:  filter "=>" permit
     filter: string
+    permit:  number~3
     !number: ("1"|"2"|"4"|"5"|"6"|"7")                    -> number
     string: ESCAPED_STRING                                -> string
     %import common.ESCAPED_STRING 
@@ -410,11 +406,12 @@ _file_grammar = """
 
 _task_grammar = """
     start: task+                                           -> start
-    task: app "@" host "(" params ")" [scheduler]          -> task
-    scheduler: (date | interval | cron)
-    !date: "[d=" string "]"
-    !interval: "[i=" string "]"
-    !cron: "[c=" string "]"
+    task: [scheduler] app "@" host "(" params ")"          -> task
+    scheduler: (date | interval | cron | event)
+    !date: "d[" string "]"
+    !interval: "i[" string "]"
+    !cron: "c[" string "]"
+    !event: "e[" string "]"
     app: CNAME
     host: CNAME
     params: [var ("," var)*]

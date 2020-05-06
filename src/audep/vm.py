@@ -132,14 +132,14 @@ class Vm:
         file = File(et.vme)
         for of in et.app["file"]:
             # put file
-            if of.operation == '=>':
+            if of.operation == '>>':
                 file.put_file(of)
 
     def _do_get_file(self, et):
         file = File(et.vme)
         for of in et.app["file"]:
             # get file
-            if of.operation == '<=':
+            if of.operation == '<<':
                 file.get_file(of)
 
     def _do_action(self, et):

@@ -31,8 +31,6 @@ pip install pywin32-ctypes
 
 pip install pefile
 
-pip install win32com
-
 # linux dependencies
 
 no dependencies

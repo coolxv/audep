@@ -19,12 +19,7 @@ class File:
                 for idx, val in enumerate(locs):
                     if self._vme.put(val, remotes[idx]) < self._vme.error:
                         raise FileError(f'put file failed when transfer file,{val} {remotes[idx]}')
-                    if of.permit:
-                        if of.re:
-                            if re.search(of.re, os.path.basename(remotes[idx]), flags=0):
-                                self._vme.run(f"chmod -f {of.permit} {remotes[idx]}")
-                        else:
-                            self._vme.run(f"chmod -f {of.permit} {remotes[idx]}")
+                    self._change_mode(of.mode, remotes[idx])
             else:
                 raise FileError('local dir is not exist when transfer files')
         else:
@@ -34,12 +29,7 @@ class File:
                 self._vme.run(f"mkdir -p {remote_dir}")
                 if self._vme.put(local, remote) < self._vme.error:
                     raise FileError(f'put files failed when transfer files,{local} {remote}')
-                if of.permit:
-                    if of.re:
-                        if re.search(of.re, os.path.basename(remote), flags=0):
-                            self._vme.run(f"chmod -f {of.permit} {remote}")
-                    else:
-                        self._vme.run(f"chmod -f {of.permit} {remote}")
+                self._change_mode(of.mode, remote)
             else:
                 raise FileError('local file is not exist when transfer file')
 
@@ -55,12 +45,8 @@ class File:
                 for idx, val in enumerate(remotes):
                     if self._vme.get(val, locs[idx]) < self._vme.error:
                         raise FileError(f'get file failed when transfer file,{val} {locs[idx]}')
-                    if of.permit and platform.system() != 'Windows':
-                        if of.re:
-                            if re.search(of.re, os.path.basename(locs[idx]), flags=0):
-                                self._vme.local(f"chmod -f {of.permit} {locs[idx]}")
-                        else:
-                            self._vme.local(f"chmod -f {of.permit} {locs[idx]}")
+                    if platform.system() != 'Windows':
+                        self._change_mode(of.mode, locs[idx])
             else:
                 raise FileError('remote dir is not exist when transfer files')
         else:
@@ -74,14 +60,17 @@ class File:
 
                 if self._vme.get(remote, loc) < self._vme.error:
                     raise FileError(f'get file failed when transfer file,{remote} {loc}')
-                if of.permit and platform.system() != 'Windows':
-                    if of.re:
-                        if re.search(of.re, os.path.basename(loc), flags=0):
-                            self._vme.run(f"chmod -f {of.permit} {loc}")
-                    else:
-                        self._vme.run(f"chmod -f {of.permit} {loc}")
+                if platform.system() != 'Windows':
+                    self._change_mode(of.mode, loc)
             else:
                 raise FileError('remote file is not exist when transfer file')
+
+    def _change_mode(self, modes, file):
+        if len(modes) > 0:
+            for mode in modes:
+                if re.search(mode["filter"],  os.path.basename(file), flags=0):
+                    self._vme.run(f"chmod -f {mode['permit']} file")
+                    break
 
 
 if __name__ == '__main__':
