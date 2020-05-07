@@ -69,7 +69,7 @@ class File:
         if len(modes) > 0:
             for mode in modes:
                 if re.search(mode["filter"],  os.path.basename(file), flags=0):
-                    self._vme.run(f"chmod -f {mode['permit']} file")
+                    self._vme.run(f"chmod -f {mode['permit']} {file}")
                     break
 
 
