@@ -38,3 +38,7 @@ no dependencies
 # examples
 
 https://github.com/coolxv/audep-example.git
+
+# documentation 
+
+[中文](doc/audep_zh.png)|[English](doc/audep_en.png)
